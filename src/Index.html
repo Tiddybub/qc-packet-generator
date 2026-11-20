@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+           margin: 0; background: #f4f5f7; color: #1a1d21; }
+    .wrap { max-width: 560px; margin: 0 auto; padding: 20px 16px 60px; }
+    h1 { font-size: 22px; margin: 8px 0 2px; }
+    .sub { color: #667; margin: 0 0 18px; font-size: 14px; }
+    .card { background: #fff; border-radius: 12px; padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.12); margin-bottom: 14px; }
+    label.fld { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
+    input[type=text], select {
+      width: 100%; padding: 12px; font-size: 16px; border: 1px solid #c9ced6;
+      border-radius: 8px; background: #fff;
+    }
+    .mods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .mod { display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+           border: 1px solid #d7dbe2; border-radius: 8px; font-size: 15px; cursor: pointer; }
+    .mod input { width: 20px; height: 20px; }
+    .mod.on { border-color: #2f6fed; background: #eef4ff; }
+    .mod.blocked { opacity: .45; background: #f1f2f4; cursor: not-allowed; }
+    .hint { font-size: 13px; color: #667; margin-top: 6px; }
+    .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .segbtn { padding: 16px 8px; font-size: 17px; font-weight: 800; letter-spacing: .5px;
+              border: 2px solid #c9ced6; background: #fff; color: #667;
+              border-radius: 10px; cursor: pointer; }
+    .segbtn.on { border-color: #2f6fed; background: #2f6fed; color: #fff; }
+    button.go { width: 100%; padding: 15px; font-size: 17px; font-weight: 700;
+                color: #fff; background: #2f6fed; border: 0; border-radius: 10px; cursor: pointer; }
+    button.go:disabled { background: #9db8f0; }
+    .result { display: none; }
+    .result a { display: block; text-align: center; padding: 14px; margin-top: 10px;
+                background: #1d9d55; color: #fff; border-radius: 10px; font-weight: 700;
+                text-decoration: none; font-size: 16px; }
+    .result a.folder { background: #556; }
+    /* pre-line so the multi-line "drawings are out of date" message from
+       generatePacket() stays readable instead of collapsing into one blob */
+    .err { display: none; color: #b3261e; font-weight: 600; margin-top: 10px;
+           white-space: pre-line; text-align: left; line-height: 1.45; }
+    .spin { display: none; text-align: center; color: #667; margin-top: 10px; font-size: 15px; }
+  </style>
+</head>
+<body>
+<div class="wrap" id="login" style="max-width:400px">
+  <h1>Vantopia QC Packet Generator</h1>
+  <div class="card">
+    <label class="fld">Username</label>
+    <input type="text" id="user" autocomplete="off">
+    <label class="fld">Password</label>
+    <div style="position:relative">
+      <input type="password" id="pass" style="padding-right:52px">
+      <button type="button" onclick="togglePass()" aria-label="Show password"
+        style="position:absolute;right:6px;top:50%;transform:translateY(-50%);
+               border:0;background:none;font-size:22px;cursor:pointer">&#128065;</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:10px;margin-top:14px;font-size:16px;font-weight:700;cursor:pointer">
+      <input type="checkbox" id="remember" checked style="width:24px;height:24px">
+      Remember me on this device
+    </label>
+    <div class="err" id="loginerr">Wrong username or password.</div>
+  </div>
+  <button class="go" onclick="tryLogin()">Sign In</button>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <h1>Vantopia QC Packet Generator</h1>
+  <p class="sub">Pick the order details — the packet is created in the customer's Drive folder.</p>
+
+  <div class="card">
+    <label class="fld">Where does this packet go?</label>
+    <div class="seg" id="destseg">
+      <button type="button" class="segbtn on" data-v="new"      onclick="pick('destseg',this)">NEW CUSTOMER</button>
+      <button type="button" class="segbtn"    data-v="existing" onclick="pick('destseg',this)">EXISTING FOLDER</button>
+    </div>
+
+    <div id="newbox">
+      <label class="fld">Customer name</label>
+      <input type="text" id="customer" placeholder="e.g. Jane Smith" autocomplete="off">
+      <div class="hint">A folder with this name is created in Customers, or reused if it already exists.</div>
+    </div>
+
+    <div id="existbox" style="display:none">
+      <label class="fld">Customer folder</label>
+      <select id="folderpick"><option value="">Loading folders…</option></select>
+      <div class="hint">The packet is added to this folder. Nothing already in it is touched.</div>
+    </div>
+
+    <label class="fld">Van model</label>
+    <select id="model"></select>
+
+    <label class="fld">Dually?</label>
+    <div class="seg" id="duallyseg">
+      <button type="button" class="segbtn on" data-v="no"  onclick="pick('duallyseg',this)">NO DUALLY</button>
+      <button type="button" class="segbtn"    data-v="yes" onclick="pick('duallyseg',this)">DUALLY</button>
+    </div>
+
+    <label class="fld">Wall material</label>
+    <div class="seg" id="wallseg">
+      <button type="button" class="segbtn on" data-v="Beadboard" onclick="pick('wallseg',this)">BEADBOARD</button>
+      <button type="button" class="segbtn"    data-v="ACM"       onclick="pick('wallseg',this)">ACM</button>
+    </div>
+
+    <label class="fld">Modules ordered</label>
+    <div class="mods" id="mods"></div>
+
+    <label class="fld">Extra notes for the title line (optional)</label>
+    <input type="text" id="extras" placeholder="e.g. Dually, Shipped, No Sink" autocomplete="off">
+  </div>
+
+  <button class="go" id="go" onclick="go()">Generate QC Packet</button>
+  <div class="spin" id="spin">Building the packet… this takes about half a minute.</div>
+  <div class="err" id="err"></div>
+  <div class="result" id="result">
+    <a id="doclink" href="#" target="_blank">Open the QC packet</a>
+    <a id="folderlink" class="folder" href="#" target="_blank">Open the customer folder</a>
+  </div>
+</div>
+
+<script>
+  function togglePass() {
+    var p = document.getElementById('pass');
+    p.type = (p.type === 'password') ? 'text' : 'password';
+  }
+
+  function showApp() {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+
+  // Credentials are checked server-side (checkLogin in Code.js).
+  function tryLogin() {
+    var u = document.getElementById('user').value.trim().toLowerCase();
+    var p = document.getElementById('pass').value.trim().toLowerCase();
+    google.script.run.withSuccessHandler(function (ok) {
+      if (!ok) {
+        document.getElementById('loginerr').style.display = 'block';
+        return;
+      }
+      if (document.getElementById('remember').checked) {
+        try { localStorage.setItem('vqc_u', u); localStorage.setItem('vqc_p', p); } catch (e) {}
+      } else {
+        try { localStorage.removeItem('vqc_u'); localStorage.removeItem('vqc_p'); } catch (e) {}
+      }
+      showApp();
+    }).checkLogin(u, p);
+  }
+
+  // Auto sign-in if remembered on this device
+  try {
+    var su = localStorage.getItem('vqc_u'), sp = localStorage.getItem('vqc_p');
+    if (su && sp) {
+      google.script.run.withSuccessHandler(function (ok) { if (ok) showApp(); }).checkLogin(su, sp);
+    }
+  } catch (e) {}
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') tryLogin();
+  });
+
+  function pick(segId, btn) {
+    var seg = document.getElementById(segId);
+    seg.querySelectorAll('.segbtn').forEach(function (b) { b.classList.remove('on'); });
+    btn.classList.add('on');
+    if (segId === 'wallseg') refreshWallLabels();
+    if (segId === 'destseg') refreshDest();
+  }
+
+  function refreshDest() {
+    var existing = segValue('destseg') === 'existing';
+    document.getElementById('newbox').style.display = existing ? 'none' : 'block';
+    document.getElementById('existbox').style.display = existing ? 'block' : 'none';
+  }
+  function refreshWallLabels() {
+    var mat = segValue('wallseg').toUpperCase();
+    document.querySelectorAll('#mods .mod[data-wall]').forEach(function (lab) {
+      lab.querySelector('span').textContent = lab.dataset.base + ' — ' + mat;
+    });
+  }
+  function segValue(segId) {
+    return document.getElementById(segId).querySelector('.segbtn.on').dataset.v;
+  }
+
+  var MODELCFG = {};      // model name -> [{label, def, wall, kind}]
+  var CONFLICTS = [];     // [{a, b, message}] — kinds that cannot ship together
+
+  google.script.run.withSuccessHandler(function (cfg) {
+    MODELCFG = cfg.models || {};
+    CONFLICTS = cfg.conflicts || [];
+    var sel = document.getElementById('model');
+    Object.keys(MODELCFG).forEach(function (m) {
+      var o = document.createElement('option');
+      o.value = m; o.textContent = m;
+      sel.appendChild(o);
+    });
+    sel.onchange = renderMods;
+    renderMods();
+  }).getConfig();
+
+  // Existing customer folders for the dropdown. Loaded once at startup so
+  // switching to EXISTING FOLDER is instant.
+  google.script.run
+    .withSuccessHandler(function (folders) {
+      var sel = document.getElementById('folderpick');
+      sel.innerHTML = '';
+      folders.forEach(function (f) {
+        var o = document.createElement('option');
+        o.value = f.id; o.textContent = f.name;
+        sel.appendChild(o);
+      });
+      if (!folders.length) sel.innerHTML = '<option value="">No folders found</option>';
+    })
+    .withFailureHandler(function () {
+      document.getElementById('folderpick').innerHTML =
+        '<option value="">Could not load folders — reload the page</option>';
+    })
+    .listCustomerFolders();
+
+  function renderMods() {
+    var m = document.getElementById('model').value;
+    var box = document.getElementById('mods');
+    box.innerHTML = '';
+    (MODELCFG[m] || []).forEach(function (g) {
+      var lab = document.createElement('label');
+      lab.className = 'mod' + (g.def ? ' on' : '');
+      if (g.kind) lab.dataset.kind = g.kind;
+      var cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.value = g.label; cb.checked = !!g.def;
+      cb.onchange = function () {
+        lab.classList.toggle('on', cb.checked);
+        applyConflicts();
+      };
+      lab.appendChild(cb);
+      var span = document.createElement('span');
+      if (g.wall) { lab.dataset.wall = '1'; lab.dataset.base = g.label; }
+      span.textContent = g.wall ? (g.label + ' — ' + segValue('wallseg').toUpperCase()) : g.label;
+      lab.appendChild(span);
+      box.appendChild(lab);
+    });
+    applyConflicts();
+  }
+
+  /**
+   * Grey out and untick whichever side of a conflict pair is not in use.
+   * Ticking a raised bed blocks every dinette and vice versa; clearing both
+   * sides unblocks everything again. The greying out is the whole message —
+   * no text is shown. generatePacket() still throws c.message if the form
+   * is bypassed entirely.
+   */
+  function applyConflicts() {
+    var mods = Array.prototype.slice.call(document.querySelectorAll('#mods .mod'));
+    mods.forEach(function (lab) {
+      lab.classList.remove('blocked');
+      lab.querySelector('input').disabled = false;
+    });
+
+    CONFLICTS.forEach(function (c) {
+      var side = {};
+      side[c.a] = mods.filter(function (l) { return l.dataset.kind === c.a; });
+      side[c.b] = mods.filter(function (l) { return l.dataset.kind === c.b; });
+      var ticked = function (list) {
+        return list.some(function (l) { return l.querySelector('input').checked; });
+      };
+      var block = function (list) {
+        list.forEach(function (l) {
+          var cb = l.querySelector('input');
+          cb.checked = false; cb.disabled = true;
+          l.classList.remove('on');
+          l.classList.add('blocked');
+        });
+      };
+      if (ticked(side[c.a]) && side[c.b].length) block(side[c.b]);
+      else if (ticked(side[c.b]) && side[c.a].length) block(side[c.a]);
+    });
+  }
+
+  function go() {
+    var btn = document.getElementById('go');
+    var err = document.getElementById('err');
+    var res = document.getElementById('result');
+    var spin = document.getElementById('spin');
+    err.style.display = 'none'; res.style.display = 'none';
+
+    var groups = [];
+    document.querySelectorAll('#mods input:checked').forEach(function (cb) { groups.push(cb.value); });
+
+    // Destination: an existing folder from the dropdown, or a new/reused folder
+    // named after the typed customer. Either way the header text is the folder name.
+    var useExisting = segValue('destseg') === 'existing';
+    var picker = document.getElementById('folderpick');
+    var folderId = '', customer = document.getElementById('customer').value;
+    if (useExisting) {
+      folderId = picker.value;
+      customer = picker.options[picker.selectedIndex] ? picker.options[picker.selectedIndex].text : '';
+      if (!folderId) {
+        err.textContent = 'Pick a customer folder first.';
+        err.style.display = 'block';
+        return;
+      }
+    }
+
+    var payload = {
+      customer: customer,
+      model: document.getElementById('model').value,
+      groups: groups,
+      extras: document.getElementById('extras').value,
+      dually: segValue('duallyseg') === 'yes',
+      wallMaterial: segValue('wallseg'),
+      folderId: folderId
+    };
+
+    btn.disabled = true; spin.style.display = 'block';
+    google.script.run
+      .withSuccessHandler(function (r) {
+        btn.disabled = false; spin.style.display = 'none';
+        document.getElementById('doclink').href = r.url;
+        document.getElementById('folderlink').href = r.folderUrl;
+        res.style.display = 'block';
+      })
+      .withFailureHandler(function (e) {
+        btn.disabled = false; spin.style.display = 'none';
+        err.textContent = e.message || e;
+        err.style.display = 'block';
+      })
+      .generatePacket(payload);
+  }
+</script>
+</body>
+</html>
