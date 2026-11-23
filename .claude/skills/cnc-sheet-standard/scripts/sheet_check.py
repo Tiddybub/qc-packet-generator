@@ -43,7 +43,7 @@ def check(path, tool_mm=6.0, quiet=False, stock_in=None):
     lab = labels(feats, top, real)
     shallow = [f for f in lab if real - f['zmin'] < LABEL_DEPTH - 0.05]
     is_badge = lambda f: (abs(real - f['zmin'] - BADGE_DEPTH) < 0.05
-                          and 100 <= max(f['bbox'][2] - f['bbox'][0], f['bbox'][3] - f['bbox'][1]) <= 160)
+                          and 80 <= max(f["bbox"][2] - f["bbox"][0], f["bbox"][3] - f["bbox"][1]) <= 160)
     badge = [f for f in lab if is_badge(f)]
     deep = [f for f in lab if real - f['zmin'] > LABEL_DEPTH + 0.05 and not is_badge(f)]
     multi = [f for f in lab if len([z for z in f['flat'] if z < real - 0.01 and f['flat'][z] > 5]) > 1]

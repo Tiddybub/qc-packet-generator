@@ -174,6 +174,10 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
   - **Repeated through lap**: the through lap is cut twice on the same path at the same depth,
     tabs included (Jack Drain). The repeat is removed only if every point of it lies on the first
     lap at the same Z.
+  - **A, the pass-1 lap already lifts over the tabs** (DD1 closet, 2026-11-23: the pass-1 feature
+    laps at Z5.05, 0.51 in deep, rising to Z5.588 over each tab, then steps down to Z0.508 with the
+    same lifts). Still one lap for pass 1: a lap may rise up to 6.5 mm on the way round. It moves
+    to half depth, the second level goes, the through lap and its tabs stay.
   - **B** one feature: ramp, lap at a pass-1 floor, ramp, through laps (I2-I4). Same result.
   - **C** one feature with a single through lap (I1): a copy of it at the pass-1 depth is inserted
     first, then the bit lifts to its plunge height, goes back to the start and runs the original.
@@ -449,6 +453,17 @@ pass. verify passed on both: labels, parts, straight plunges, T-slots and dust l
   and get no dust lap. Tell the user.
 - Delivered as `ID1-75in-DepthFix3.MMG` and `ID2-5in-DepthFix3.MMG` (`-Depthchange` would make the ID1
   name 24 characters).
+
+DD1 / DD2 (2026-11-23, Transit DD closet: `DD1-75in-Transit Closet.MMG`, `DD2-5in-TransitCloset.MMG`
+from Drive folder "Transit DD Closet Unit"): the first new sheets run through the whole V19 recipe.
+- Labels came in 0.01-0.10 in deep (programmer error). Words read: DD1 ADD, ADK x2, DDE x2; DD2 DDB,
+  FUSES, DDA, DDC. DD1 has two single marks like a C on its side that could not be read for sure:
+  left out of `--label-text`, so traced. The user was told. Badges DD1 / DD2 (three letters:
+  box 92 x 58 and 101 x 58 mm).
+- DD1 9 parts (the layout above), DD2 27 parts (layout A). T-slots DD1 9, DD2 30. FireGuard DD1
+  113, DD2 36. Openings DD1 2, DD2 2. verify, FireGuard, depth passes and the sheet check all OK.
+- Named `DD1.75-ClaudeV1.MMG` and `DD2.5-ClaudeV1.MMG`; a new "Claude" folder made inside the closet
+  folder on the user's word, with a README (DD1 zipped: 3.8 MB).
 
 D1-D10 (2026-11-19, the "RB" sheets, older `-Depth_Fix` / `-DepthFix` exports): D1-D6 are 1/2 in,
 D7-D10 are 3/4 in. All ten pass verify with single-line labels and the new badge text `D<n>RB`.

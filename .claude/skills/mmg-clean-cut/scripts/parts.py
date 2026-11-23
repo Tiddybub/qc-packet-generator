@@ -82,14 +82,18 @@ def _seg_t(p, a, b):
     return math.dist(p, (a[0] + t * ax, a[1] + t * ay)), t
 
 
-def _lap_close(moves, s, P0, z):
+TAB_LIFT = 6.5     # mm: the most a pass-1 lap may rise over a tab and still count as one lap
+
+
+def _lap_close(moves, s, P0, z, lift=0.0):
     """walk from moves[s] (a lap at depth z that starts at P0) to where the path comes back to P0.
     Returns (j, mid): moves[j] reaches P0; mid = it passes P0 part-way (straight moves only).
-    None if the lap leaves depth z first, or closes part-way along an arc."""
+    None if the lap leaves depth z first, or closes part-way along an arc.
+    lift: the lap may rise up to this much above z on the way round (lifts over tabs, DD1)."""
     run = 0.0
     for j in range(s, len(moves)):
         m = moves[j]
-        if abs(m[4] - z) > 1e-6 or abs(m[7] - z) > 1e-6:
+        if min(m[4], m[7]) < z - 1e-6 or max(m[4], m[7]) > z + lift + 1e-6:
             return None
         a, b = (m[2], m[3]), (m[5], m[6])
         if run > 20.0:
@@ -301,7 +305,8 @@ def convert_parts(feats, lines, ptop, real_top, pass1, programmed_tabs, edits, d
                 # 2 laps at Z3.81): pass 1 = one lap at its first level; the rest goes
                 pc = P['cut']
                 s0 = next((k for k, m in enumerate(pc) if abs(m[4] - fl[0]) < 1e-6 and abs(m[7] - fl[0]) < 1e-6 and _xy(m)), None)
-                cl0 = _lap_close(pc, s0, (pc[s0][2], pc[s0][3]), fl[0]) if s0 is not None else None
+                # the first lap may already lift over the tabs (DD1 closet: Z5.05 with lifts to Z5.588)
+                cl0 = _lap_close(pc, s0, (pc[s0][2], pc[s0][3]), fl[0], lift=TAB_LIFT) if s0 is not None else None
                 if cl0 is None:
                     log(f'part {ids}: pass-1 feature has levels {fl} and its first lap does not close - left as is'); continue
                 j0, mid0 = cl0
