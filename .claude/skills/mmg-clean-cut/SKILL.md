@@ -151,6 +151,25 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
     the last 0.5 mm at 1/10 of the plunge feed, cut the stroke, lift the first 0.5 mm at that slow
     feed, rapid up. Plunge first, then cut: never moving sideways while going down.
   - The feed after the label is left as it was.
+- **Restyling the labels of a finished file** (`scripts/labelstyle.py`; user, 2026-11-23: "Labels
+  look good change the mmg clean cut skill to edit the labels to cut this way", then "redo
+  d1-d10"). For files whose labels were made before the new standard (24 mm, 0.18 in, 75 %):
+  ```
+  python3 -I scripts/labelstyle.py IN.MMG OUT.MMG --stock-in 0.5   (defaults: --scale 1.15 --depth-in 0.21 --feed-factor 0.7)
+  ```
+  - Reads every label word back as straight-line-font letters (text, reading direction, centre)
+    and writes it again 27.7 mm tall in the same spot, 0.21 in deep, at 0.7 x its old cutting
+    feed, in the same plunge-then-cut style. A label that is not in the font stops it (nothing
+    written).
+  - Wood rule: a word that would come within 6 mm of any other cut (or of another word) is made
+    only as big as keeps that wood, and never smaller than it was. A word that already had less
+    than 6 mm keeps what it had: it stays the old size. Each one is printed: tell the user.
+  - The badge keeps its size, path and depth; the feed of every sideways move x0.7.
+  - It checks itself: every other cut line for line the same, every word read back in the same
+    spot at the new depth, badge changed only in its feeds.
+  - Reference: D1-D10 V2.0 (2026-11-23), 68 words: 50 full size; 6 partly bigger (D1 AKB, D7 CY,
+    D10 DHB x2, ACE x4); 12 kept 24 mm (D3 DAE, D7 DCG, D8 PD x2, CL x2, PF x2; the D8 CL and PF
+    and D7 DCG already ran into a hole, slot or pocket in every earlier version).
 - **Changing only a depth in a finished file** (`scripts/labeldepth.py`): moves every Z of the cuts
   that are `--from-in` deep to `--to-in`, keeping the slow last 0.5 mm, and proves that nothing else
   in the file changed. Used for V17: `labeldepth.py V16.MMG V17.MMG --stock-in 0.5 --from-in 0.20
@@ -529,6 +548,12 @@ D7-D10 are 3/4 in. All ten pass verify with single-line labels and the new badge
     "what changed" heading (rule 5); say whether the version has been cut on the router (rule 8).
   - GitHub: commits carry the repo owner's name and no co-author or AI lines (rule 6).
   - This skill is kept there too (`mmg-clean-cut/`, `cnc-sheet-standard/`), next to `tools/*.js`.
+- **Version numbers** (user, 2026-11-23: "Change to V2.0 every update will be +.1"): after
+  ClaudeV19 the D-sheets went to ClaudeV2.0; every update after that adds 0.1 (V2.1, V2.2 ...).
+  File names: `D<n>RB.5-ClaudeV2.0.MMG` / `D<n>RB.75-ClaudeV2.0.MMG` (23 characters for D10,
+  still within what the RichAuto takes); README `README - ClaudeV2.0 (use these)`.
+- V2.0 (2026-11-23): the new label standard on all ten sheets (`labelstyle.py` on the V19
+  files). Only the label cut and the badge feeds differ from V19. Not yet cut on the router.
 - **Only the newest version stays in the Drive Claude folder** (user rule, 2026-11-20: "it only
   needs to be Claude V3 files in there ... every time you update, remove all old versions").
   Every update: upload the new set and its README, then move every older ClaudeV<n> file, zip
