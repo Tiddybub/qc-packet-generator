@@ -467,6 +467,11 @@ from Drive folder "Transit DD Closet Unit"): the first new sheets run through th
   We're gonna test it out."). `convert.py --label-scale 1.15`: label words 27.7 mm tall, about
   7.9 mm of wood between cuts; badge still 24 mm. Only the 5 + 4 label words differ from V1.
   The default stays 24 mm (and the RB sheets stay as they are) until the user says how the test cut.
+- **ClaudeV3 = the same test, also slower** (user, same day: "Make just the labels cut 30% slower
+  also ... Badge too"). Taken as 30 % off the feeds they had: `--label-feed-pct 52.5
+  --badge-box-feed-pct 35`. Both closet programs have a 630 ipm label feed, so labels and badge
+  letters run at 331 ipm (were 472) and the badge box at 220 ipm (was 315). Only F words differ
+  from V2. Still a closet-only test: the defaults stay 75 % and 50 %.
 - Named `DD1.75-ClaudeV1.MMG` and `DD2.5-ClaudeV1.MMG`; a new "Claude" folder made inside the closet
   folder on the user's word, with a README (DD1 zipped: 3.8 MB).
 
