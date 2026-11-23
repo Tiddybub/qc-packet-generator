@@ -481,6 +481,12 @@ D7-D10 are 3/4 in. All ten pass verify with single-line labels and the new badge
 - V19 (2026-11-23): pocketed-out openings in depth passes (`depthpasses.py` on the V18 files).
   D8 first (PH opening + 4 dog-bone slots by CL), then the other sheets. D4 and D9 have none:
   their V19 is byte for byte their V18.
+- **The user's own rule list** is `SKILL.md` in their repo Tiddybub/mmg-cleanup-skill ("ALL OF
+  TIM'S RULES"). Read it before writing a Drive README or pushing to GitHub. From it:
+  - README: the credit line in capitals near the top, and the same credit with the date on every
+    "what changed" heading (rule 5); say whether the version has been cut on the router (rule 8).
+  - GitHub: commits carry the repo owner's name and no co-author or AI lines (rule 6).
+  - This skill is kept there too (`mmg-clean-cut/`, `cnc-sheet-standard/`), next to `tools/*.js`.
 - **Only the newest version stays in the Drive Claude folder** (user rule, 2026-11-20: "it only
   needs to be Claude V3 files in there ... every time you update, remove all old versions").
   Every update: upload the new set and its README, then move every older ClaudeV<n> file, zip
