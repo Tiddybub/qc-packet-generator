@@ -90,13 +90,14 @@ def _turn(strokes, rot, cx, cy):
     return [[(cx + x * c - y * s, cy + x * s + y * c) for x, y in st] for st in strokes]
 
 
-def in_box(text, box, rot, tool_mm=6.0):
+def in_box(text, box, rot, tool_mm=6.0, scale=1.0):
     """the word centred where the old word was (its box = what the old word covered, bit edge
-    included), turned rot degrees counter-clockwise like the old word. 24 mm tall; smaller only
-    if it would not fit inside the old word. -> (strokes, letter height mm)"""
+    included), turned rot degrees counter-clockwise like the old word. 24 mm tall (times scale:
+    convert.py --label-scale); smaller only if it would not fit inside the old word.
+    -> (strokes, letter height mm)"""
     x0, y0, x1, y1 = box
     W, H = (x1 - x0, y1 - y0) if rot % 180 == 0 else (y1 - y0, x1 - x0)
-    unit = UNIT
+    unit = UNIT * scale
     for _ in range(80):
         st, w = upright(text, unit)
         ex = _ext(st)

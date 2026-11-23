@@ -462,6 +462,11 @@ from Drive folder "Transit DD Closet Unit"): the first new sheets run through th
   box 92 x 58 and 101 x 58 mm).
 - DD1 9 parts (the layout above), DD2 27 parts (layout A). T-slots DD1 9, DD2 30. FireGuard DD1
   113, DD2 36. Openings DD1 2, DD2 2. verify, FireGuard, depth passes and the sheet check all OK.
+- **ClaudeV2 = a TEST, closet sheets only** (user, 2026-11-23: "not the badge. Can you make the labels
+  about 15% bigger? They're coming out fuzzy for some reason ... just for the closet right here.
+  We're gonna test it out."). `convert.py --label-scale 1.15`: label words 27.7 mm tall, about
+  7.9 mm of wood between cuts; badge still 24 mm. Only the 5 + 4 label words differ from V1.
+  The default stays 24 mm (and the RB sheets stay as they are) until the user says how the test cut.
 - Named `DD1.75-ClaudeV1.MMG` and `DD2.5-ClaudeV1.MMG`; a new "Claude" folder made inside the closet
   folder on the user's word, with a README (DD1 zipped: 3.8 MB).
 

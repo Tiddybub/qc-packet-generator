@@ -78,6 +78,8 @@ def main():
     ap.add_argument('--label-font', choices=['block', 'hershey'], default='block',
                     help='block (default): the straight-line font, 24 mm letters, badge in a box (blockfont.py, user V4-V17). '
                          'hershey: the older curved font with the badge ring (files up to ClaudeV3)')
+    ap.add_argument('--label-scale', type=float, default=1.0, help='label words this many times the 24 mm standard size, e.g. 1.15 '
+                    '(the badge stays 24 mm). Only when the user asks: first used as a test on the closet sheets DD1/DD2')
     ap.add_argument('--badge-depth-in', type=float, default=0.25)    # user 2026-11-23: "Cut the badges at like 0.25" (was 0.20, before that the label depth)
     ap.add_argument('--label-feed-pct', type=float, default=75.0, help='labels and badge letters: percent of the programmed label feed (75 = 300 ipm on 1/2 in sheets, 472 on 3/4)')
     ap.add_argument('--badge-box-feed-pct', type=float, default=50.0, help='the badge box: percent of the programmed label feed (50 = 200 / 315 ipm)')
@@ -185,10 +187,12 @@ def main():
                     continue
                 z_this, spct = z_label, None
                 if w and a.label_font == 'block':
-                    strokes, cap = blockfont.in_box(w['text'], tuple(w['box']), w['rot'], a.tool_mm)
+                    strokes, cap = blockfont.in_box(w['text'], tuple(w['box']), w['rot'], a.tool_mm, a.label_scale)
                     note = f'"{w["text"]}" in the straight-line font, {cap:.1f} mm tall, turned {w["rot"]} deg'
+                    if cap < blockfont.CAP * blockfont.UNIT * a.label_scale - 0.01:
+                        note += f' - SMALLER than the {blockfont.CAP * blockfont.UNIT * a.label_scale:.1f} mm asked for, to fit the old word: tell the user'
                     if cap < blockfont.CAP * blockfont.UNIT - 0.01:
-                        note += ' - SMALLER than 24 mm to fit the old word: less than 6 mm of wood between cuts, tell the user'
+                        note += ' - SMALLER than 24 mm: less than 6 mm of wood between cuts, tell the user'
                     if blockfont.not_cut_yet(w['text']):
                         note += f' - letter(s) {" ".join(blockfont.not_cut_yet(w["text"]))} have never been cut in this font: look at the preview, tell the user'
                     report['words'].append({'feature': f['id'], 'old': sorted(w['ids']), 'box': w['box'], 'text': w['text']})
