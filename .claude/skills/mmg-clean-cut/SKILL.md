@@ -472,6 +472,14 @@ from Drive folder "Transit DD Closet Unit"): the first new sheets run through th
   --badge-box-feed-pct 35`. Both closet programs have a 630 ipm label feed, so labels and badge
   letters run at 331 ipm (were 472) and the badge box at 220 ipm (was 315). Only F words differ
   from V2. Still a closet-only test: the defaults stay 75 % and 50 %.
+- **Why labels fuzz, and ClaudeV4** (same day). The user's compression bit cuts upward for its
+  first 0.2 in ("I think ours is .2"). At 0.18 in the whole label is cut by that up-cutting tip,
+  which lifts the top fibres. A label has to be deeper than the up-cut length for the down-cutting
+  part to reach the surface. User: "Can you lower label depth to .21" -> `labeldepth.py --from-in
+  0.18 --to-in 0.21` on the V3 closet files (words and traced marks; badge stays 0.25 in). 0.21 is
+  only 0.01 in past the tip: if it still fuzzes, the next step offered was 0.25 in. Closet-only
+  test: the 0.18 in default stays until the user says how it cut. Ask for the bit's up-cut length
+  whenever labels fuzz on a new bit.
 - Named `DD1.75-ClaudeV1.MMG` and `DD2.5-ClaudeV1.MMG`; a new "Claude" folder made inside the closet
   folder on the user's word, with a README (DD1 zipped: 3.8 MB).
 
