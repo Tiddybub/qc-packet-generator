@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Clean-cut conversion for a compression bit.
 
-  labels : one bit-wide line, one pass at --label-depth-in (default 0.18 in) below the real stock top.
+  labels : one bit-wide line, one pass at --label-depth-in (default 0.21 in) below the real stock top.
            Words read with labelwords.py (--label-text) are written again in the straight-line font
-           (blockfont.py): 24 mm letters, no curves, 6 mm of wood between cuts, same spot and direction.
+           (blockfont.py): 27.7 mm letters (--label-scale 1.15), no curves, same spot and direction.
            Other labels are traced along the middle of the old letter (singleline.py).
-           Every stroke runs at --label-feed-pct (75 %) of the programmed label feed, plunges fast to
+           Every stroke runs at --label-feed-pct (52.5 %) of the programmed label feed, plunges fast to
            --label-slow-mm (0.5 mm) above depth and feeds the rest at 1/10 of the plunge feed.
   badge  : --badge-text D1RB: the sheet name in the same font inside a box with clipped corners,
            centred where the old badge ring was, --badge-depth-in (default 0.25 in) deep; the box
-           runs at --badge-box-feed-pct (50 %).
+           runs at --badge-box-feed-pct (35 %).
            (--pocket-labels: the old pocketed letters; --label-font hershey: the curved font and ring of V1-V3.)
   parts  : outline in two passes. Pass 1 = the roughing lap (same path as the finish lap) at
            --part-pass1 (default: halfway through). Pass 2 = the finish lap through, unchanged.
@@ -28,8 +28,8 @@
   holes  : a round through-hole that the CAM cuts as one lap round its edge (which frees a plug)
            is cut from the centre outwards instead; its edge lap is kept as is. See holes.py.
 
-Usage: python3 convert.py IN.MMG OUT.MMG [--stock-in 0.71] [--label-depth-in 0.18] [--badge-depth-in 0.25]
-           [--label-text WORDS.json] [--badge-text D1RB] [--label-feed-pct 75] [--badge-box-feed-pct 50]
+Usage: python3 convert.py IN.MMG OUT.MMG [--stock-in 0.71] [--label-depth-in 0.21] [--badge-depth-in 0.25]
+           [--label-text WORDS.json] [--badge-text D1RB] [--label-feed-pct 52.5] [--badge-box-feed-pct 35] [--label-scale 1.15]
            [--extra-labels 103,104] [--not-labels 7,8] [--part-pass1 half|<in>]
            [--no-labels] [--no-parts] [--programmed-tabs] [--keep-ramps] [--plunge-feed 5080]
            [--tslot-feed 3810] [--tslot-plunge-feed 1270] [--extra-tslots 36,48] [--not-tslots 7]
@@ -67,7 +67,7 @@ def main():
     ap.add_argument('src'); ap.add_argument('dst')
     ap.add_argument('--stock-in', type=float, default=None, help='real thickness in inches; default 0.71, or 0.5 with --foam')
     ap.add_argument('--foam', action='store_true', help='foam sheet: add the dust lap only; labels, passes, plunges and T-slots are left exactly as programmed')
-    ap.add_argument('--label-depth-in', type=float, default=0.18)    # user rule 2026-11-20 (was 0.165)
+    ap.add_argument('--label-depth-in', type=float, default=0.21)    # user 2026-11-23: deeper than the bit's 0.2 in up-cut tip (0.18 from 2026-11-20, 0.165 before)
     ap.add_argument('--pocket-labels', action='store_true', help='cut labels as pockets like the CAM did (old rule) instead of one bit-wide line')
     ap.add_argument('--label-text', default=None, help='JSON list of label words [{"ids": [...], "text": "DCM", "rot": 0, "box": [x0, y0, x1, y1]}] '
                     '(labelwords.py): each word is written again in the single-line font (fontlabels.py)')
@@ -78,11 +78,11 @@ def main():
     ap.add_argument('--label-font', choices=['block', 'hershey'], default='block',
                     help='block (default): the straight-line font, 24 mm letters, badge in a box (blockfont.py, user V4-V17). '
                          'hershey: the older curved font with the badge ring (files up to ClaudeV3)')
-    ap.add_argument('--label-scale', type=float, default=1.0, help='label words this many times the 24 mm standard size, e.g. 1.15 '
-                    '(the badge stays 24 mm). Only when the user asks: first used as a test on the closet sheets DD1/DD2')
+    ap.add_argument('--label-scale', type=float, default=1.15, help='label words this many times the 24 mm grid size: 1.15 = 27.7 mm letters, '
+                    'the standard since the closet test cut clean (user 2026-11-23). The badge stays 24 mm')
     ap.add_argument('--badge-depth-in', type=float, default=0.25)    # user 2026-11-23: "Cut the badges at like 0.25" (was 0.20, before that the label depth)
-    ap.add_argument('--label-feed-pct', type=float, default=75.0, help='labels and badge letters: percent of the programmed label feed (75 = 300 ipm on 1/2 in sheets, 472 on 3/4)')
-    ap.add_argument('--badge-box-feed-pct', type=float, default=50.0, help='the badge box: percent of the programmed label feed (50 = 200 / 315 ipm)')
+    ap.add_argument('--label-feed-pct', type=float, default=52.5, help='labels and badge letters: percent of the programmed label feed (52.5 = 210 ipm on a 400 ipm program, 331 on a 630 ipm one; was 75 until 2026-11-23)')
+    ap.add_argument('--badge-box-feed-pct', type=float, default=35.0, help='the badge box: percent of the programmed label feed (35 = 140 / 220 ipm; was 50 until 2026-11-23)')
     ap.add_argument('--label-slow-mm', type=float, default=0.5, help='each stroke: the last this-many mm of the plunge and the first of the lift run at 1/10 of the plunge feed; 0 = off')
     ap.add_argument('--tool-mm', type=float, default=6.0, help='bit diameter (mm)')
     ap.add_argument('--extra-labels', default='')

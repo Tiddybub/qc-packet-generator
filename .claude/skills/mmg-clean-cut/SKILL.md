@@ -1,6 +1,6 @@
 ---
 name: mmg-clean-cut
-description: Fix fuzzy edges on CNC router programs (.MMG / G-code) cut with a compression bit. Labels: one bit-wide line, 0.18 in deep, written in the shop's straight-line font (24 mm letters, no curves, 6 mm of wood between cuts), cut 25 % slower with a slow last 0.5 mm of each plunge. Sheet badge: the sheet name (e.g. D1RB) in a box with clipped corners, 0.25 in deep, box at half feed. Part outlines: exactly three laps - pass 1 at half depth, pass 2 through, then one dust lap at full depth (extra laps the CAM wrote are removed first). Straight plunges instead of ramps, T-slots (the clover-headed joint pockets) at 150 ipm, round through-holes cut from the centre outwards so no loose plug gets sucked into the vacuum, FireGuard (narrow holes, slots and slits cut in depth steps so they do not burn), and a cut simulation that proves no part or label changes shape. Foam sheets get only the hole fix and two dust laps (no tabs, 0.5 in, `--foam`). Use when the user hands over an .MMG file and mentions fuzz, label depth, label font or size, the badge, compression bit, passes, plunging, T-slots, cutting too aggressively, burning or fire, sawdust or debris left in the cut, an extra or cleanup pass, or "do the same as I9".
+description: Fix fuzzy edges on CNC router programs (.MMG / G-code) cut with a compression bit. Labels: one bit-wide line, 0.21 in deep (deeper than the compression bit's 0.2 in up-cut tip, which is what stops the fuzz), written in the shop's straight-line font (27.7 mm letters, no curves), cut at about half feed with a slow last 0.5 mm of each plunge. Sheet badge: the sheet name (e.g. D1RB) in a box with clipped corners, 0.25 in deep, box at half feed. Part outlines: exactly three laps - pass 1 at half depth, pass 2 through, then one dust lap at full depth (extra laps the CAM wrote are removed first). Straight plunges instead of ramps, T-slots (the clover-headed joint pockets) at 150 ipm, round through-holes cut from the centre outwards so no loose plug gets sucked into the vacuum, FireGuard (narrow holes, slots and slits cut in depth steps so they do not burn), and a cut simulation that proves no part or label changes shape. Foam sheets get only the hole fix and two dust laps (no tabs, 0.5 in, `--foam`). Use when the user hands over an .MMG file and mentions fuzz, label depth, label font or size, the badge, compression bit, passes, plunging, T-slots, cutting too aggressively, burning or fire, sawdust or debris left in the cut, an extra or cleanup pass, or "do the same as I9".
 ---
 
 # MMG clean cut
@@ -29,13 +29,13 @@ repeat the skill then adds on purpose. The two never conflict: CAM repeats out, 
 | Setting | Default | Flag |
 |---|---|---|
 | Labels | one bit-wide line, same spot and direction (user rule, 2026-11-19) | `--pocket-labels` for the old pocketed letters |
-| Label font | the shop's straight-line font (`blockfont.py`): straight lines and 45-degree corners only, no curves. Letters 24 mm (0.95 in) tall, 6 mm of wood between any two cuts. Words are read with `labelwords.py`, never guessed (user, V4 2026-11-21) | `--label-text WORDS.json`; `--label-font hershey` for the curved V1-V3 font |
+| Label font | the shop's straight-line font (`blockfont.py`): straight lines and 45-degree corners only, no curves. Label letters 27.7 mm (1.09 in) tall = the 24 mm grid x 1.15, about 7.9 mm of wood between cuts (user, 2026-11-23, after the closet test: "Labels look good"). Words are read with `labelwords.py`, never guessed | `--label-text WORDS.json`; `--label-scale` (1.15); `--label-font hershey` for the curved V1-V3 font |
 | Sheet badge | the sheet name in the same font inside a box with clipped corners (no circle), centred where the old badge ring was (user, V4) | `--badge-text D1RB` |
 | Real stock thickness | 3/4 in sheets (`*-75in`): 0.71 in (18 mm). 1/2 in sheets (`*-5in`): 0.5 in (user confirmed). Foam: 0.5 in | `--stock-in` |
-| Label depth, one pass | 0.18 in (Z13.462 in 0.71 stock; user rule 2026-11-20, was 0.165 in) | `--label-depth-in` |
+| Label depth, one pass | 0.21 in (Z12.700 in 0.71 stock, Z7.366 in 0.5). It must be deeper than the bit's up-cut length, 0.2 in on the user's bit: shallower and the whole label is cut by the up-cutting tip, which fuzzes (user, 2026-11-23; 0.18 in from 2026-11-20, 0.165 in before) | `--label-depth-in` |
 | Badge depth, one pass | 0.25 in, letters and box (user, 2026-11-23: "Cut the badges at like 0.25"; 0.20 in from V10 to V16) | `--badge-depth-in` |
-| Label and badge letter feed | 75 % of the programmed label feed = 300 ipm on 1/2 in sheets, 472 ipm on 3/4 in (user, V11/V12: 25 % slower) | `--label-feed-pct` |
-| Badge box feed | 50 % of the programmed label feed = 200 ipm / 315 ipm (user, V10) | `--badge-box-feed-pct` |
+| Label and badge letter feed | 52.5 % of the programmed label feed = 210 ipm on a 400 ipm program, 331 ipm on a 630 ipm one (user, 2026-11-23: "30% slower ... Badge too", on top of the 25 % of V11/V12) | `--label-feed-pct` |
+| Badge box feed | 35 % of the programmed label feed = 140 ipm / 220 ipm (user, 2026-11-23; 50 % from V10) | `--badge-box-feed-pct` |
 | Label and badge plunge | fast to 0.5 mm above depth, the last 0.5 mm at 1/10 of the plunge feed, then cut; the first 0.5 mm of the lift at that slow feed too (user, V9) | `--label-slow-mm` |
 | Extra label | a word the drawing shows but the CAM file lacks; only with the text and the spot from the user | `--add-label "DCM@214,2287,90"` |
 | Part pass 1 depth | halfway through, so pass 2 isn't too heavy | `--part-pass1 half` or inches |
@@ -86,7 +86,7 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
 
 ## What it changes
 
-- **Labels**: one pass at the label depth (0.18 in), one bit wide. A label is
+- **Labels**: one pass at the label depth (0.21 in), one bit wide. A label is
   - any shallow engraving in a POCKET op (text, arrows, marks on the parts), and
   - the **sheet ID badge**: the name engraved on the sheet scrap in the bottom-right corner
     (I9, B2, D1RB ...): engraving outside every part and within 300 mm of that corner.
@@ -97,9 +97,10 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
   - Every label WORD is written again: same text, centred where the old word was, same direction.
   - Straight lines and 45-degree corners only. No arcs, no curves, no smoothing: a letter is a
     few G1 moves, so there is nothing to jitter.
-  - Size: letters 24 mm (0.95 in) tall, always. They sit on a grid of 20 units x 1.2045 mm.
+  - Size: label letters 27.7 mm (1.09 in) tall: the grid of 20 units x 1.2045 mm (24 mm, the size
+    the badge keeps) times 1.15. 24 mm labels came out fuzzy; the closet test at 1.15 cut clean.
     Letters are 12 units wide (I 0, 1 4, L 11, M 14) and 10 units apart, which is 12 mm between
-    cut centres = 6 mm of wood between any two cuts with the 6 mm bit.
+    cut centres = 6 mm of wood between any two cuts with the 6 mm bit (at 1.15: 13.9 mm and 7.9 mm).
   - Smaller only when the word would not fit inside the old word. convert then prints `SMALLER`:
     tell the user (less than 6 mm of wood between cuts).
   - The letter shapes were read back from the user's own ClaudeV16 files (68 words, 10 badges),
@@ -119,6 +120,14 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
     a `--label-text` word; verify checks it keeps 3 mm of wood from every other cut.
   - verify: each word stays inside the box the old word covered (bit edge included), at the label
     depth, nothing deeper, and no cut of a word feature is outside a word box.
+- **Why labels fuzz: depth against the bit's up-cut length** (user, 2026-11-23). A compression bit
+  cuts upward for its first stretch (0.2 in on the user's bit: "I think ours is .2") and downward
+  above it. Only the downward part leaves a clean top edge. A label shallower than the up-cut
+  length is cut by the up-cutting tip alone and fuzzes whatever the feed. So labels are 0.21 in.
+  On a new bit, ask for its up-cut length and set `--label-depth-in` just past it.
+  The standard was set by a test on the closet sheets DD1/DD2: V2 15 % bigger, V3 30 % slower,
+  V4 0.21 in deep; the user cut V4: "Labels look good change the mmg clean cut skill to edit the
+  labels to cut this way". On a 1/2 in sheet 0.21 in is 42 % of the thickness: say so.
 - **Sheet badge: the name in a box** (user, V4, V7, V8; 2026-11-23: "we changed that circle"):
   - Always give `--badge-text` (the sheet's name, e.g. `D1RB`). The old ring and the old letters
     are removed. There is no circle any more.
@@ -135,9 +144,9 @@ through thicker foam; and with no tabs the panel is loose when the extra laps ru
   - Without `--badge-text` the old ring and letters are traced as one line each (old behaviour) and
     convert says so. Don't deliver that: ask for the sheet name.
 - **Label and badge feeds and plunges** (user, V9-V12: the bit was tearing the letters):
-  - Letters (labels and badge) run at 75 % of the programmed label feed: 300 ipm on 1/2 in sheets
-    (F7620), 472 ipm on 3/4 in sheets (F12000).
-  - The badge box runs at 50 %: 200 ipm (F5080) / 315 ipm (F8000).
+  - Letters (labels and badge) run at 52.5 % of the programmed label feed: 210 ipm where the
+    program says 400 (F5334), 331 ipm where it says 630 (F8400).
+  - The badge box runs at 35 %: 140 ipm (F3556) / 220 ipm (F5600).
   - Every stroke: rapid to above its start, plunge at the plunge feed to 0.5 mm above depth, feed
     the last 0.5 mm at 1/10 of the plunge feed, cut the stroke, lift the first 0.5 mm at that slow
     feed, rapid up. Plunge first, then cut: never moving sideways while going down.
@@ -466,20 +475,20 @@ from Drive folder "Transit DD Closet Unit"): the first new sheets run through th
   about 15% bigger? They're coming out fuzzy for some reason ... just for the closet right here.
   We're gonna test it out."). `convert.py --label-scale 1.15`: label words 27.7 mm tall, about
   7.9 mm of wood between cuts; badge still 24 mm. Only the 5 + 4 label words differ from V1.
-  The default stays 24 mm (and the RB sheets stay as they are) until the user says how the test cut.
+  This became the standard once V4 cut clean (see "Why labels fuzz").
 - **ClaudeV3 = the same test, also slower** (user, same day: "Make just the labels cut 30% slower
   also ... Badge too"). Taken as 30 % off the feeds they had: `--label-feed-pct 52.5
   --badge-box-feed-pct 35`. Both closet programs have a 630 ipm label feed, so labels and badge
   letters run at 331 ipm (were 472) and the badge box at 220 ipm (was 315). Only F words differ
-  from V2. Still a closet-only test: the defaults stay 75 % and 50 %.
+  from V2. These are the defaults now.
 - **Why labels fuzz, and ClaudeV4** (same day). The user's compression bit cuts upward for its
   first 0.2 in ("I think ours is .2"). At 0.18 in the whole label is cut by that up-cutting tip,
   which lifts the top fibres. A label has to be deeper than the up-cut length for the down-cutting
   part to reach the surface. User: "Can you lower label depth to .21" -> `labeldepth.py --from-in
   0.18 --to-in 0.21` on the V3 closet files (words and traced marks; badge stays 0.25 in). 0.21 is
   only 0.01 in past the tip: if it still fuzzes, the next step offered was 0.25 in. Closet-only
-  test: the 0.18 in default stays until the user says how it cut. Ask for the bit's up-cut length
-  whenever labels fuzz on a new bit.
+  test at first; the user cut it and made it the standard. The D1-D10 RB sheets (V19) still have
+  the old labels (24 mm, 0.18 in, 75 %): redo them only when the user asks.
 - Named `DD1.75-ClaudeV1.MMG` and `DD2.5-ClaudeV1.MMG`; a new "Claude" folder made inside the closet
   folder on the user's word, with a README (DD1 zipped: 3.8 MB).
 

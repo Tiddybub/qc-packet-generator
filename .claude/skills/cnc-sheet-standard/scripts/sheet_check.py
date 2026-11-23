@@ -38,7 +38,7 @@ def check(path, tool_mm=6.0, quiet=False, stock_in=None):
     say(f'  gap from zero corner (bottom-left): left {inch(x0):.2f} in, bottom {inch(y0):.2f} in')
     if inch(x0) > MAX_CORNER_GAP_IN or inch(y0) > MAX_CORNER_GAP_IN:
         problems.append('cuts do not start at the bottom-left corner')
-    # labels: 0.18 in below the real top, one pass. Shallow = the programmer's error: TELL THE USER
+    # labels: 0.21 in below the real top, one pass. Shallow = the programmer's error: TELL THE USER
     # the sheet badge (a label 100-160 mm long, the name in a box) is 0.25 in deep: that is right, not "deeper"
     lab = labels(feats, top, real)
     shallow = [f for f in lab if real - f['zmin'] < LABEL_DEPTH - 0.05]

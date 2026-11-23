@@ -1,6 +1,6 @@
 ---
 name: cnc-sheet-standard
-description: Shop standard for EVERY CNC cut - run this FIRST every time we create, edit, fix, convert, extract, split, re-place or preview cut parts, a sheet, a CNC file, .MMG or G-code, before anything else. 48 x 96 in sheet, zero X0 Y0 bottom-left, jobs start at the bottom-left, never rotate parts, a couple of tabs per part, labels exactly 0.18 in deep (shallower = programmer error, tell the user), every part in 2 passes plus one dust lap, T-slots cut slower (150 ipm), depths set for the REAL thickness (1/2 in or 18 mm), foam = 0.5 in with NO tabs and only 2 dust laps, round through-holes always cut from the centre outwards, RichAuto .MMG only, files sent one by one in chat, and always a preview picture of the 48 x 96 board with the cut on it.
+description: Shop standard for EVERY CNC cut - run this FIRST every time we create, edit, fix, convert, extract, split, re-place or preview cut parts, a sheet, a CNC file, .MMG or G-code, before anything else. 48 x 96 in sheet, zero X0 Y0 bottom-left, jobs start at the bottom-left, never rotate parts, a couple of tabs per part, labels exactly 0.21 in deep (shallower = programmer error, tell the user), every part in 2 passes plus one dust lap, T-slots cut slower (150 ipm), depths set for the REAL thickness (1/2 in or 18 mm), foam = 0.5 in with NO tabs and only 2 dust laps, round through-holes always cut from the centre outwards, RichAuto .MMG only, files sent one by one in chat, and always a preview picture of the 48 x 96 board with the cut on it.
 ---
 
 # CNC sheet standard (run first, every cut file)
@@ -21,8 +21,8 @@ nothing gets delivered. The steps:
    off the sheet's left or bottom edge (COC came in flush with the corner, with the bit 1/4 in off
    the sheet). It only shifts the job sideways, never rotates it, and proves every line changed by
    exactly the shift.
-3. **Fix depths and passes** with `mmg-clean-cut` for the real thickness: labels 0.18 in in one
-   pass (straight-line font, 24 mm letters, 25 % slower), the sheet badge 0.25 in deep as the
+3. **Fix depths and passes** with `mmg-clean-cut` for the real thickness: labels 0.21 in in one
+   pass (straight-line font, 27.7 mm letters, cut at about half feed), the sheet badge 0.25 in deep as the
    sheet name in a box (pass `--badge-text D1RB`; label words with `--label-text`), parts in 2
    passes, straight plunges, T-slots (the clover-headed joint pockets) slowed to 150 ipm with a
    50 ipm plunge, and one extra dust lap round each part at full depth (400 ipm) to sweep the
@@ -65,13 +65,13 @@ bottom-right.
      (90 = counter-clockwise from above), then `standard.py` on the result.
    - A rotation keeps the shape, the G2/G3 cut direction and the label text. The script proves
      every position and arc centre.
-4. **Labels are exactly 0.18 in deep** below the real top, in one pass. (User rule 2026-11-20:
-   "put all label depths at 0.18 instead of 0.165 ... going forward". Files made before that are
-   at 0.165 in.)
+4. **Labels are exactly 0.21 in deep** below the real top, in one pass. (User, 2026-11-23, after the
+   closet test: the compression bit cuts upward for its first 0.2 in, so a shallower label is all
+   fuzz. Files made before that are at 0.18 in, older ones at 0.165 in.)
    - **The sheet ID badge is 0.25 in deep** (user 2026-11-23: "Cut the badges at like 0.25"): the
      sheet name in a box with clipped corners. The check prints `sheet badge: 0.250 in deep - OK`.
    - Label and badge style (straight-line font, 24 mm letters, slower feeds) is in `mmg-clean-cut`.
-   - **If a file comes in with labels shallower than 0.18 in, tell the user.** It's the
+   - **If a file comes in with labels shallower than 0.21 in, tell the user.** It's the
      programmer's error and we fix it here.
 5. **Every part is cut in 2 passes**, on both 1/2 in and 18 mm wood: half depth, then through.
    - One lap per pass. Extra depth levels and repeated laps the CAM added come out.

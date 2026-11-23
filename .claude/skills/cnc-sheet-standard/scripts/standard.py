@@ -3,7 +3,7 @@
 
   1. check the file as the programmer sent it (shallow labels = programmer error -> tell the user)
   2. move it to the X0 Y0 bottom-left corner if it isn't there (moves only, never rotates)
-  3. mmg-clean-cut for the REAL thickness: labels 0.18 in in one pass, parts in 2 passes,
+  3. mmg-clean-cut for the REAL thickness: labels 0.21 in in one pass, parts in 2 passes,
      straight plunges, holes and slots untouched
   4. mmg-clean-cut verify: shapes unchanged (must pass)
   5. check the result against the standard (must say RESULT: OK)
@@ -68,7 +68,7 @@ def main():
     problems = check(a.src, a.tool_mm, stock_in=stock_in)
     shallow = [p for p in problems if 'SHALLOW' in p]
     if shallow:
-        print('*** TELL THE USER: labels are cut shallower than 0.18 in - programmer error. Fixing it here. ***')
+        print('*** TELL THE USER: labels are cut shallower than 0.21 in - programmer error. Fixing it here. ***')
 
     work = tempfile.mkdtemp()
     try:
